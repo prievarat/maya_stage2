@@ -8,154 +8,626 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root {
-            --primary-300: #F9C97A; --primary-500: #F4A329; --primary-700: #B45309;
-            --secondary-300: #7EDAD6; --secondary-500: #2BB6B4; --secondary-700: #0F766E;
-            --bg: #FFF7F2; --surface: #FFFFFF; --text: #1F2937; --text-muted: #6B7280;
-            --error: #D92D20; --success: #2F9E44; --border: #E6E9EF;
+            --primary: #F4A329;
+            --secondary: #2BB6B4;
+            --bg: #FFF7F2;
+            --surface: #FFFFFF;
+            --text: #1F2937;
+            --text-dim: #6B7280;
+            --error: #D92D20;
+            --border: #E6E9EF;
+            --success: #22c55e;
         }
+
         * { box-sizing: border-box; }
-        body { margin: 0; background-color: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
-        #login-screen { position: fixed; inset: 0; background: var(--bg); z-index: 200; display: flex; align-items: center; justify-content: center; }
-        .login-box { text-align: center; background: white; padding: 40px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-        .pass-input { border: none; border-bottom: 2px solid var(--primary-500); color: var(--primary-700); font-family: 'JetBrains Mono'; font-size: 32px; text-align: center; outline: none; letter-spacing: 5px; text-transform: uppercase; width: 300px; }
-        #intro-overlay, #game-over-overlay { position: fixed; inset: 0; background: rgba(255, 247, 242, 0.98); z-index: 100; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 40px; text-align: center; }
-        .mission-card { background: white; border: 2px solid var(--primary-500); padding: 40px; max-width: 600px; border-radius: 12px; }
-        .btn-main { margin-top: 20px; padding: 12px 30px; background: var(--secondary-500); color: white; border: none; border-radius: 99px; font-family: 'JetBrains Mono'; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; }
-        #game-ui { display: none; flex: 1; grid-template-columns: 1fr 1fr; height: 100%; max-width: 1400px; margin: 0 auto; width: 100%; }
-        .header { position: absolute; top: 0; left: 0; right: 0; padding: 15px 30px; background: white; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; z-index: 10; }
-        #timer-display { font-size: 20px; font-weight: bold; padding: 5px 15px; border: 2px solid var(--border); border-radius: 6px; font-family: 'JetBrains Mono'; }
-        .pool-zone { padding: 80px 40px 40px 40px; border-right: 1px solid var(--border); overflow-y: auto; background: rgba(255,255,255,0.5); }
-        .packet { background: white; border: 1px solid var(--border); border-left: 4px solid var(--text-muted); padding: 15px; margin-bottom: 12px; border-radius: 6px; cursor: pointer; font-size: 14px; transition: 0.2s; }
-        .packet:hover { border-color: var(--secondary-500); transform: translateX(5px); }
-        .packet.used { opacity: 0.4; pointer-events: none; background: #F3F4F6; }
-        .timeline-zone { padding: 80px 40px 40px 40px; background: white; display: flex; flex-direction: column; overflow-y: auto; }
-        .timeline-slot { min-height: 60px; background: #F9FAFB; border: 1px dashed #D1D5DB; margin-bottom: 15px; display: flex; align-items: center; padding: 15px 15px 15px 30px; border-radius: 6px; position: relative; font-size: 14px; }
-        .slot-time { position: absolute; left: -25px; font-family: 'JetBrains Mono'; font-size: 11px; color: var(--text-muted); font-weight: bold; }
-        .timeline-slot.filled { background: #F0FDFA; border: 1px solid var(--secondary-500); }
-        .highlight-letter { background-color: #FFFF00; color: black; font-weight: bold; padding: 0 2px; border-radius: 2px; }
-        #penalty-msg { color: var(--error); font-family: 'JetBrains Mono'; font-size: 12px; height: 20px; margin-top: 10px; text-align: center; }
-        #check-btn { width: 100%; padding: 15px; border-radius: 6px; border: none; font-family: 'JetBrains Mono'; font-weight: bold; cursor: pointer; }
-        #check-btn:disabled { background: #E5E7EB; color: #9CA3AF; }
-        #check-btn:not(:disabled) { background: var(--secondary-500); color: white; }
-        #puzzle-area { display: none; margin-top: 30px; border-top: 2px dashed var(--border); padding-top: 30px; text-align: center; }
-        .puzzle-input { font-family: 'JetBrains Mono'; font-size: 24px; text-transform: uppercase; letter-spacing: 10px; padding: 10px; text-align: center; border: 2px solid var(--primary-500); width: 250px; }
-        #success-msg { margin-top: 20px; border: 2px solid var(--success); background: #F0FDF4; color: var(--success); padding: 20px; border-radius: 8px; display: none; }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg);
+            background-image: radial-gradient(#F9C97A 0.5px, transparent 0.5px);
+            background-size: 24px 24px;
+            font-family: 'Inter', sans-serif;
+            color: var(--text);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- INTRO OVERLAY --- */
+        #intro-overlay {
+            position: fixed;
+            inset: 0;
+            background: var(--bg);
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+        }
+
+        .file-container {
+            background: white;
+            max-width: 800px;
+            width: 100%;
+            height: 90vh;
+            padding: 40px;
+            border-radius: 4px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+            border-top: 5px solid var(--primary);
+            font-family: 'JetBrains Mono', monospace;
+            line-height: 1.6;
+            color: #374151;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .section-title {
+            font-weight: 700;
+            color: var(--secondary);
+            margin-top: 25px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        #start-btn {
+            margin-top: 30px;
+            padding: 15px;
+            background: var(--secondary);
+            color: white;
+            border: none;
+            font-family: 'JetBrains Mono';
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        #start-btn:hover { background: #0F766E; transform: translateY(-2px); }
+
+        /* --- GAME UI --- */
+        #game-ui {
+            display: none;
+            height: 100vh;
+            flex-direction: column;
+        }
+
+        .top-bar {
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+            padding: 10px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+        }
+
+        .timer-box {
+            background: #FEF2F2;
+            color: var(--error);
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono';
+            font-weight: bold;
+            font-size: 18px;
+            border: 1px solid #FECACA;
+            display: flex; align-items: center; gap: 10px;
+            transition: background 0.3s;
+        }
+
+        .workspace {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 250px 1fr 350px;
+            overflow: hidden;
+        }
+
+        .suspect-nav {
+            background: #F9FAFB;
+            border-right: 1px solid var(--border);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .suspect-btn {
+            padding: 15px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex; align-items: center; gap: 10px;
+            transition: all 0.2s;
+        }
+        .suspect-btn:hover { border-color: var(--secondary); }
+        .suspect-btn.active { border-color: var(--secondary); background: #F0FDFA; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        
+        .avatar {
+            width: 32px; height: 32px; background: #E5E7EB; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px;
+        }
+
+        .statement-zone {
+            padding: 40px;
+            background: white;
+            overflow-y: auto;
+            border-right: 1px solid var(--border);
+        }
+
+        .zone-header {
+            font-family: 'JetBrains Mono'; font-weight: bold; font-size: 14px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 20px; display: flex; align-items: center; gap: 8px;
+        }
+
+        .statement-paper {
+            background: #FFFCF5;
+            border: 1px solid #E5E7EB;
+            padding: 30px;
+            border-radius: 2px;
+            font-family: 'Inter', serif;
+            font-size: 18px;
+            line-height: 1.8;
+            color: #374151;
+        }
+
+        /* CARD STYLE FOR STATEMENTS */
+        .statement-line {
+            cursor: pointer;
+            padding: 15px;
+            border-radius: 8px;
+            transition: all 0.2s;
+            margin-bottom: 15px;
+            display: block;
+            border: 2px solid #E5E7EB;
+            background: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .statement-line:hover { 
+            background: #FEF3C7; 
+            border-color: var(--primary); 
+            transform: translateX(5px); 
+        }
+        .statement-line.selected { 
+            background: var(--primary); 
+            color: white; 
+            border-color: #B45309; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+            font-weight: 600; 
+        }
+
+        .evidence-zone {
+            background: #F3F4F6;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .evidence-list {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 5px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .evidence-card {
+            background: white;
+            border: 2px solid transparent;
+            border-color: var(--border);
+            padding: 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .evidence-card:hover { transform: translateX(-2px); border-color: var(--secondary); }
+        .evidence-card.selected { border-color: var(--secondary); background: #F0FDFA; transform: translateX(-5px); box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        
+        .evidence-title { font-weight: bold; color: var(--text); }
+        .evidence-meta { font-family: 'JetBrains Mono'; font-size: 11px; color: var(--text-dim); }
+
+        .action-bar {
+            margin-top: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .objection-btn {
+            width: 100%;
+            background: #374151;
+            color: white;
+            border: none;
+            padding: 12px;
+            font-family: 'JetBrains Mono';
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+        
+        .objection-btn:hover { background: #111827; }
+        
+        .objection-btn.ready { 
+            background: var(--success); 
+            animation: pulse 2s infinite; 
+        }
+        
+        .feedback {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            padding: 10px 20px; border-radius: 8px; font-weight: bold; font-family: 'JetBrains Mono';
+            z-index: 200; display: none;
+        }
+        .feedback.error { background: var(--error); color: white; }
+        .feedback.success { background: var(--success); color: white; }
+        
+        .shake { animation: shake 0.4s; }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-10px); }
+            40% { transform: translateX(10px); }
+            60% { transform: translateX(-10px); }
+            80% { transform: translateX(10px); }
+        }
+
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); } 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); } }
+
+        /* SUCCESS SCREEN */
+        #success-screen {
+            position: fixed; inset: 0; background: #111; z-index: 500;
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            color: #fff; font-family: 'JetBrains Mono'; text-align: center;
+        }
     </style>
 </head>
 <body>
-    <div id="login-screen"><div class="login-box"><h2>SYSTEM ACCESS</h2><p>ENTER PASSCODE FROM STAGE 1</p><input type="text" class="pass-input" id="passcode" maxlength="8" placeholder="_ _ _ _ _ _ _ _" autofocus></div></div>
-    <div id="intro-overlay"><div class="mission-card"><h3>AUDIO INTERCEPT</h3><p>Reorder the packets to reconstruct the events. Mistakes cost 1 minute.</p><button class="btn-main" onclick="startGame()">START ANALYSIS</button></div></div>
-    <div id="game-over-overlay"><div class="mission-card"><h1 style="color:var(--error)">SIGNAL LOST</h1><button class="btn-main" onclick="location.reload()">RESTART</button></div></div>
-    <div id="game-ui">
-        <div class="header"><span>AUDIO_RECONSTRUCT_V3</span><div id="timer-display">10:00</div></div>
-        <div class="pool-zone"><div id="packet-container"></div></div>
-        <div class="timeline-zone">
-            <div id="timeline-container"></div>
-            <div id="penalty-msg"></div>
-            <button id="check-btn" onclick="checkSolution()" disabled>ANALYZE SEQUENCE</button>
-            <div id="puzzle-area"><p>SEQUENCE CORRECT. DESCRAMBLE THE HIGHLIGHTS:</p><input type="text" id="final-word" class="puzzle-input" maxlength="6" onkeyup="checkFinalPuzzle()"></div>
-            <div id="success-msg"><h3>IDENTIFIED: BOILER ROOM</h3><button onclick="goToStage3()" class="btn-main">PROCEED TO STAGE 3</button></div>
+
+    <div id="intro-overlay">
+        <div class="file-container">
+            <div style="border-bottom: 2px solid #E5E7EB; padding-bottom: 20px; margin-bottom: 20px; display:flex; justify-content:space-between;">
+                <span style="font-weight:700; color:#D92D20;">SYSTEM ALERT: USER INACTIVE</span>
+                <span>ENCRYPTED MSG</span>
+            </div>
+            
+            <p>If you are reading this, it means I’m gone. And if you guessed the password, it means you’re the only friends I have left who are smart enough to help.</p>
+
+            <div class="section-title">1. THE DISCOVERY</div>
+            <p>You know I’ve been working on 'Project Aether.' It’s a breakthrough. I found a way to rewrite the cooling protocols for global server farms. <strong>It reduces energy consumption by 40%.</strong> It’s worth millions.</p>
+
+            <div class="section-title">2. THE TARGET</div>
+            <p>I was finalizing the presentation for the National Science Fair when things got weird. Someone has been tracking my digital footprint. They tried to remote-hack this laptop three times last night.</p>
+
+            <div class="section-title">3. THE FLASHDRIVE</div>
+            <p>I got scared. I took the source code offline. It is stored on a single <strong>Silver USB Drive</strong> on my keychain. It never leaves my pocket.</p>
+
+            <div class="section-title">4. THE SUSPECTS</div>
+            <p>There were only three other people in the Science Block with me late last night.</p>
+            <ul style="list-style:none; padding:0;">
+                <li style="background:#F9FAFB; padding:10px; margin-bottom:5px; border-left:3px solid #F4A329;"><strong>Dr. Aris:</strong> My professor. He wants the credit.</li>
+                <li style="background:#F9FAFB; padding:10px; margin-bottom:5px; border-left:3px solid #2BB6B4;"><strong>Zara:</strong> My rival. Desperate for money.</li>
+                <li style="background:#F9FAFB; padding:10px; margin-bottom:5px; border-left:3px solid #D92D20;"><strong>Mr. Henderson:</strong> The Janitor. Always snooping.</li>
+            </ul>
+
+            <div style="background:#FEF2F2; color:#D92D20; padding:15px; margin-top:20px; font-weight:bold;">
+                MISSION DIRECTIVE: <br>
+                Find the lie. Select a sentence from the suspect's statement, then select the conflicting evidence log.
+            </div>
+
+            <button id="start-btn" onclick="startGame()">ACCEPT MISSION (10:00 TIMER)</button>
         </div>
     </div>
 
-    <script>
-        // Fragmented URL for stability
-        const root = "https://prievarat.github.io/";
-        const folder = "maya_part3/";
-        
-        const audioData = [
-            { id: 1, text: "[DRIVER]: Shut the door. And take her phone. We can't have her track{i}ng us." },
-            { id: 2, text: "[MAYA]: My phone has a GPS l{o}ck! You can't turn it off." },
-            { id: 3, text: "[DRIVER]: It won't matter. The interference will kill the GPS signa{l}." },
-            { id: 4, text: "[SFX]: *Loud jackhammers and the {e}cho of a tunnel.*" },
-            { id: 5, text: "[PASSENGER]: I hate these tunnels. It smells like sulfu{r} down here." },
-            { id: 6, text: "[MAYA]: Sulfur? Under the Chemistry La{b}. You're taking me to the..." }
-        ];
+    <div id="game-ui">
+        <div class="top-bar">
+            <div style="font-weight:bold; color:var(--text-dim);">PROJECT KILLSWITCH: PHASE 2</div>
+            <div class="timer-box">
+                <i data-lucide="timer"></i>
+                <span id="timer-display">10:00</span>
+            </div>
+        </div>
 
-        let userSequence = [];
-        let shuffledData = [];
-        let timeLeft = 600;
+        <div class="workspace">
+            <div class="suspect-nav">
+                <div style="font-size:11px; font-weight:bold; color:var(--text-dim); text-transform:uppercase;">Suspect Dossiers</div>
+                <div class="suspect-btn active" onclick="loadSuspect('aris')" id="btn-aris">
+                    <div class="avatar" style="background:#FEE2E2; color:#B91C1C;">DA</div>
+                    <div>Dr. Aris</div>
+                </div>
+                <div class="suspect-btn" onclick="loadSuspect('zara')" id="btn-zara">
+                    <div class="avatar" style="background:#DBEAFE; color:#1E40AF;">ZA</div>
+                    <div>Zara</div>
+                </div>
+                <div class="suspect-btn" onclick="loadSuspect('henderson')" id="btn-henderson">
+                    <div class="avatar" style="background:#FEF3C7; color:#B45309;">HE</div>
+                    <div>Henderson</div>
+                </div>
+            </div>
+
+            <div class="statement-zone">
+                <div class="zone-header">
+                    <i data-lucide="message-square"></i> Recorded Statement
+                </div>
+                <div class="statement-paper" id="statement-text"></div>
+            </div>
+
+            <div class="evidence-zone">
+                <div class="zone-header">
+                    <i data-lucide="folder-open"></i> Collected Evidence
+                </div>
+                <div class="evidence-list" id="evidence-list"></div>
+
+                <div class="action-bar">
+                    <div style="font-size:11px; color:var(--text-dim); margin-bottom:10px;">Select ONE Statement + ONE Evidence Card</div>
+                    <button class="objection-btn" id="objection-btn" onclick="submitObjection()">SELECT A STATEMENT</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="success-screen">
+        <h1 style="font-size:64px; margin-bottom:10px; color:#22c55e;">OBJECTION UPHELD!</h1>
+        <p style="color:white; font-size:24px;">HENDERSON'S ALIBI IS BROKEN.</p>
+        <br>
+        <div style="background:#222; padding:40px; border-radius:10px; border:2px solid #22c55e; max-width: 600px;">
+            <p style="color:#ccc; margin-bottom: 20px; font-style: italic;">
+                "Okay! Fine! I didn't go to the basement! I didn't know it was important code. I just saw the shiny silver drive in her pocket... I thought it would fetch a good price at the pawn shop... but before I could sell it, I bumped into Zara outside."
+            </p>
+            <div style="border-top: 1px solid #444; padding-top: 20px; margin-top:20px;">
+                <p style="color:#fff; font-size:18px;">STAGE 3 CODEWORD:</p>
+                <h2 style="font-size:60px; letter-spacing:10px; margin:10px 0; text-shadow: 0 0 20px #22c55e;">BLACKOUT</h2>
+                <a href="stage3.html" style="display:inline-block; margin-top:20px; padding:15px 30px; background:#22c55e; color:#000; text-decoration:none; font-weight:bold; border-radius:4px;">PROCEED TO STAGE 3</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="feedback-toast" class="feedback"></div>
+
+    <script>
+        // --- DATA ---
+        const suspects = {
+            aris: {
+                statement: [
+                    "I was on the main stage from 20:00 to 21:00.",
+                    "Maya has no respect for protocol. She keeps that code on a flimsy flash drive hanging from her pocket—it's asking to be stolen.",
+                    "After the ceremony, I spoke with the Dean in the hallway about funding.",
+                    "I confiscated a device from a student near the exit, but it was just a phone.",
+                    "I left at 22:15."
+                ],
+                evidence: [
+                    { id: 'a1', title: 'Event Schedule', meta: 'Official PDF', text: '20:00 - 21:00: Awards Ceremony (Main Stage).' },
+                    { id: 'a2', title: 'Livestream Capture', meta: 'Video File', text: 'Dr. Aris visible on stage at 20:55.' },
+                    { id: 'a3', title: 'Witness Statement', meta: 'Dean Thompson', text: '"I spoke to Aris about the budget at 21:10."' },
+                    { id: 'a4', title: 'Lost & Found Log', meta: 'Security Desk', text: 'Item #99: iPhone 13 (Confiscated by Aris).' },
+                    { id: 'a5', title: 'Keycard Log', meta: 'Exit A', text: 'User: ARIS_D. Exit Time: 22:15.' },
+                    { id: 'a6', title: 'Email to Maya', meta: 'Sent Yesterday', text: '"If you do not credit me, I will fail you."' }
+                ],
+                // Aris is Innocent
+                contradiction: null 
+            },
+            zara: {
+                statement: [
+                    "I was watching the awards. Honestly? I was jealous.",
+                    "My dad's company is crashing, and that code could save us. I saw the silver drive on her desk earlier.",
+                    "I admit, I went to get water at 21:05 and walked past her booth. I thought about taking it.",
+                    "But I didn't. I just waited for her.",
+                    "I left with my dad at 22:00."
+                ],
+                evidence: [
+                    { id: 'z1', title: 'Audience Photo', meta: 'High Res', text: 'Zara visible in Row 1 at 20:45.' },
+                    { id: 'z2', title: 'CCTV: Hallway', meta: 'Cam 04', text: '21:05: Zara seen at water cooler.' },
+                    { id: 'z3', title: 'CCTV: Booth', meta: 'Cam 02', text: '21:15: Zara waiting at Booth. Empty handed.' },
+                    { id: 'z4', title: 'Wifi Log', meta: 'Network Admin', text: 'Device ZARA_PHONE connected to Hallway AP.' },
+                    { id: 'z5', title: 'Parking Log', meta: 'Gate B', text: 'Vehicle: OMEGA_CORP_SEDAN exited at 22:00.' },
+                    { id: 'z6', title: 'Text Message', meta: 'To: Dad', text: '"She is not here. I am coming out now."' }
+                ],
+                // Zara is Innocent
+                contradiction: null 
+            },
+            henderson: {
+                statement: [
+                    "I was cleaning the East Hall until 21:00.", 
+                    // GROUPED SENTENCE: To make it easier to click "The Lie"
+                    "The lights started flickering, so I went down to the basement to check the main fuse box. I'm not an electrician, but I had to look.", 
+                    "After that, I emptied the trash bins. I found an old MP3 player in the bin. It looked broken, so I kept it.", 
+                    "I clocked out at 21:35." 
+                ],
+                evidence: [
+                    { id: 'h1', title: 'Work Ticket #404', meta: 'Maintenance', text: 'East Hall Cleanup completed 20:58.' },
+                    // THE PROOF
+                    { id: 'h2', title: 'Basement Door Sensor', meta: 'Security Log', text: 'Access Log: Last activity recorded at 20:43 (Cleaning Crew).' }, 
+                    { id: 'h3', title: 'CCTV: Exit', meta: 'Cam 09', text: 'Henderson seen pushing trash cart.' },
+                    { id: 'h4', title: 'Exit Scanner Log', meta: 'Security', text: 'Alert: Unidentified USB Storage Device detected on Henderson.' }, 
+                    { id: 'h5', title: 'Time Card', meta: 'System', text: 'Henderson Clock Out: 21:35.' },
+                    { id: 'h6', title: 'Power Grid Status', meta: 'System', text: 'Voltage Stable. No flicker reported.' }
+                ],
+                // Solution: Line 1 (Basement story) + Evidence h2 (Door sensor)
+                contradiction: { lineIndex: 1, evidenceId: 'h2' } 
+            }
+        };
+
+        // --- STATE ---
+        let currentSuspect = 'aris';
+        let selectedLineIndex = null;
+        let selectedEvidenceId = null;
+        let timeRemaining = 600; 
         let timerInterval;
 
         lucide.createIcons();
 
-        document.getElementById('passcode').addEventListener('input', (e) => {
-            if(e.target.value.toUpperCase() === 'BLACKOUT') {
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('intro-overlay').style.display = 'flex';
-            }
-        });
-
         function startGame() {
             document.getElementById('intro-overlay').style.display = 'none';
-            document.getElementById('game-ui').style.display = 'grid';
-            // FISHER-YATES SHUFFLE
-            shuffledData = [...audioData];
-            for (let i = shuffledData.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [shuffledData[i], shuffledData[j]] = [shuffledData[j], shuffledData[i]];
-            }
-            timerInterval = setInterval(updateTimer, 1000);
-            renderPool(); renderTimeline();
+            document.getElementById('game-ui').style.display = 'flex';
+            loadSuspect('aris');
+            startTimer();
+            playTone(400, 'square');
         }
 
-        function updateTimer() {
-            if(timeLeft <= 0) { clearInterval(timerInterval); document.getElementById('game-over-overlay').style.display = 'flex'; return; }
-            timeLeft--;
-            const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
-            const s = (timeLeft % 60).toString().padStart(2, '0');
-            document.getElementById('timer-display').innerText = `${m}:${s}`;
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timeRemaining--;
+                const m = Math.floor(timeRemaining / 60);
+                const s = timeRemaining % 60;
+                document.getElementById('timer-display').innerText = 
+                    `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+                
+                if (timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    alert("MISSION FAILED. The trail has gone cold.");
+                    location.reload();
+                }
+            }, 1000);
         }
 
-        function renderPool() {
-            const container = document.getElementById('packet-container');
-            container.innerHTML = '';
-            shuffledData.forEach(pkt => {
-                const used = userSequence.find(u => u.id === pkt.id);
+        function loadSuspect(id) {
+            currentSuspect = id;
+            selectedLineIndex = null;
+            selectedEvidenceId = null;
+            updateButtonState();
+
+            // Render Statement
+            const sDiv = document.getElementById('statement-text');
+            sDiv.innerHTML = '';
+            suspects[id].statement.forEach((line, index) => {
                 const div = document.createElement('div');
-                div.className = `packet ${used ? 'used' : ''}`;
-                div.innerText = pkt.text.replace(/[{}]/g, '');
-                div.onclick = () => { if(!used && userSequence.length < 6) { userSequence.push(pkt); renderPool(); renderTimeline(); }};
-                container.appendChild(div);
+                div.className = 'statement-line';
+                div.innerText = line;
+                div.onclick = () => selectLine(index, div);
+                sDiv.appendChild(div);
             });
+
+            // Render Evidence
+            const eDiv = document.getElementById('evidence-list');
+            eDiv.innerHTML = '';
+            suspects[id].evidence.forEach((item) => {
+                const card = document.createElement('div');
+                card.className = 'evidence-card';
+                card.innerHTML = `<span class="evidence-title">${item.title}</span><span class="evidence-meta">${item.meta}</span><div>${item.text}</div>`;
+                card.onclick = () => selectEvidence(item.id, card);
+                eDiv.appendChild(card);
+            });
+
+            // Update Nav
+            document.querySelectorAll('.suspect-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`btn-${id}`).classList.add('active');
         }
 
-        function renderTimeline(reveal = false) {
-            const container = document.getElementById('timeline-container');
-            container.innerHTML = '';
-            for(let i=0; i<6; i++) {
-                const item = userSequence[i];
-                const div = document.createElement('div');
-                div.className = `timeline-slot ${item ? 'filled' : ''}`;
-                div.innerHTML = `<span class="slot-time">0${i}:00</span>` + (item ? (reveal ? item.text.replace(/{(\w)}/g, '<span class="highlight-letter">$1</span>') : item.text.replace(/[{}]/g, '')) : '[ Empty Slot ]');
-                container.appendChild(div);
+        function selectLine(index, element) {
+            selectedLineIndex = index;
+            document.querySelectorAll('.statement-line').forEach(el => el.classList.remove('selected'));
+            element.classList.add('selected');
+            playTone(800, 'sine');
+            updateButtonState();
+        }
+
+        function selectEvidence(id, element) {
+            selectedEvidenceId = id;
+            document.querySelectorAll('.evidence-card').forEach(el => el.classList.remove('selected'));
+            element.classList.add('selected');
+            playTone(800, 'sine');
+            updateButtonState();
+        }
+
+        function updateButtonState() {
+            const btn = document.getElementById('objection-btn');
+            
+            if (selectedLineIndex === null) {
+                btn.innerText = "SELECT A STATEMENT";
+                btn.classList.remove('ready');
+            } 
+            else if (selectedEvidenceId === null) {
+                btn.innerText = "SELECT EVIDENCE";
+                btn.classList.remove('ready');
+            } 
+            else {
+                btn.innerText = "CONTRADICTION FOUND!";
+                btn.classList.add('ready');
             }
-            document.getElementById('check-btn').disabled = userSequence.length !== 6;
         }
 
-        function checkSolution() {
-            if(userSequence.every((val, idx) => val.id === idx + 1)) {
-                renderTimeline(true);
-                document.getElementById('check-btn').style.display = 'none';
-                document.getElementById('puzzle-area').style.display = 'block';
-            } else {
-                timeLeft -= 60;
-                document.getElementById('penalty-msg').innerText = "SEQUENCE INCORRECT. -1 MINUTE.";
-                userSequence = []; renderPool(); renderTimeline();
+        function submitObjection() {
+            const btn = document.getElementById('objection-btn');
+
+            // 1. Incomplete Check
+            if (selectedLineIndex === null || selectedEvidenceId === null) {
+                btn.classList.add('shake');
+                playTone(150, 'sawtooth');
+                setTimeout(() => btn.classList.remove('shake'), 400);
+                return;
             }
-        }
 
-        function checkFinalPuzzle() {
-            if(document.getElementById('final-word').value.toUpperCase() === 'BOILER') {
-                document.getElementById('success-msg').style.display = 'block';
+            const data = suspects[currentSuspect];
+            
+            // 2. Suspect Check
+            if (!data.contradiction) {
+                showFeedback('error', "NO LIES DETECTED HERE.");
+                penalty();
+                return;
+            }
+
+            // 3. Match Check
+            // We use '==' to be safe, but data structure is consistent
+            if (data.contradiction.lineIndex === selectedLineIndex && 
+                data.contradiction.evidenceId === selectedEvidenceId) {
+                
+                // WIN!
                 clearInterval(timerInterval);
+                playTone(600, 'triangle'); 
+                document.getElementById('game-ui').style.display = 'none';
+                document.getElementById('success-screen').style.display = 'flex';
+
+            } else {
+                showFeedback('error', "EVIDENCE DOES NOT MATCH STATEMENT.");
+                penalty();
             }
         }
 
-        function goToStage3() {
-            // Force reliable navigation
-            window.location.assign(root + folder + "?v=" + Date.now());
+        function penalty() {
+            timeRemaining -= 60;
+            if(timeRemaining < 0) timeRemaining = 0;
+            
+            playTone(150, 'sawtooth');
+            const timer = document.querySelector('.timer-box');
+            timer.style.backgroundColor = '#7f1d1d';
+            timer.style.color = '#fff';
+            
+            document.body.classList.add('shake');
+            setTimeout(() => {
+                timer.style.backgroundColor = '#FEF2F2';
+                timer.style.color = 'var(--error)';
+                document.body.classList.remove('shake');
+            }, 500);
         }
+
+        function showFeedback(type, text) {
+            const toast = document.getElementById('feedback-toast');
+            toast.className = `feedback ${type}`;
+            toast.innerText = text;
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 3000);
+        }
+
+        function playTone(freq, type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.1);
+        }
+        
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     </script>
 </body>
 </html>
