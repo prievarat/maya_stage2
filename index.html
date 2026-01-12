@@ -13,99 +13,56 @@
             --bg: #FFF7F2; --surface: #FFFFFF; --text: #1F2937; --text-muted: #6B7280;
             --error: #D92D20; --success: #2F9E44; --border: #E6E9EF;
         }
-
         * { box-sizing: border-box; }
         body { margin: 0; background-color: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
-
-        /* Login Screen */
         #login-screen { position: fixed; inset: 0; background: var(--bg); z-index: 200; display: flex; align-items: center; justify-content: center; }
         .login-box { text-align: center; background: white; padding: 40px; border-radius: 12px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
         .pass-input { border: none; border-bottom: 2px solid var(--primary-500); color: var(--primary-700); font-family: 'JetBrains Mono'; font-size: 32px; text-align: center; outline: none; letter-spacing: 5px; text-transform: uppercase; width: 300px; }
-
-        /* Mission Overlays */
         #intro-overlay, #game-over-overlay { position: fixed; inset: 0; background: rgba(255, 247, 242, 0.98); z-index: 100; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 40px; text-align: center; }
         .mission-card { background: white; border: 2px solid var(--primary-500); padding: 40px; max-width: 600px; border-radius: 12px; }
-
         .btn-main { margin-top: 20px; padding: 12px 30px; background: var(--secondary-500); color: white; border: none; border-radius: 99px; font-family: 'JetBrains Mono'; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; }
-
-        /* Game UI */
         #game-ui { display: none; flex: 1; grid-template-columns: 1fr 1fr; height: 100%; max-width: 1400px; margin: 0 auto; width: 100%; }
         .header { position: absolute; top: 0; left: 0; right: 0; padding: 15px 30px; background: white; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; z-index: 10; }
         #timer-display { font-size: 20px; font-weight: bold; padding: 5px 15px; border: 2px solid var(--border); border-radius: 6px; font-family: 'JetBrains Mono'; }
-        #timer-display.danger { color: var(--error); border-color: var(--error); }
-
         .pool-zone { padding: 80px 40px 40px 40px; border-right: 1px solid var(--border); overflow-y: auto; background: rgba(255,255,255,0.5); }
         .packet { background: white; border: 1px solid var(--border); border-left: 4px solid var(--text-muted); padding: 15px; margin-bottom: 12px; border-radius: 6px; cursor: pointer; font-size: 14px; transition: 0.2s; }
         .packet:hover { border-color: var(--secondary-500); transform: translateX(5px); }
         .packet.used { opacity: 0.4; pointer-events: none; background: #F3F4F6; }
-
         .timeline-zone { padding: 80px 40px 40px 40px; background: white; display: flex; flex-direction: column; overflow-y: auto; }
         .timeline-slot { min-height: 60px; background: #F9FAFB; border: 1px dashed #D1D5DB; margin-bottom: 15px; display: flex; align-items: center; padding: 15px 15px 15px 30px; border-radius: 6px; position: relative; font-size: 14px; }
         .slot-time { position: absolute; left: -25px; font-family: 'JetBrains Mono'; font-size: 11px; color: var(--text-muted); font-weight: bold; }
         .timeline-slot.filled { background: #F0FDFA; border: 1px solid var(--secondary-500); }
-
         .highlight-letter { background-color: #FFFF00; color: black; font-weight: bold; padding: 0 2px; border-radius: 2px; }
         #penalty-msg { color: var(--error); font-family: 'JetBrains Mono'; font-size: 12px; height: 20px; margin-top: 10px; text-align: center; }
-
         #check-btn { width: 100%; padding: 15px; border-radius: 6px; border: none; font-family: 'JetBrains Mono'; font-weight: bold; cursor: pointer; }
         #check-btn:disabled { background: #E5E7EB; color: #9CA3AF; }
         #check-btn:not(:disabled) { background: var(--secondary-500); color: white; }
-
         #puzzle-area { display: none; margin-top: 30px; border-top: 2px dashed var(--border); padding-top: 30px; text-align: center; }
         .puzzle-input { font-family: 'JetBrains Mono'; font-size: 24px; text-transform: uppercase; letter-spacing: 10px; padding: 10px; text-align: center; border: 2px solid var(--primary-500); width: 250px; }
-        
         #success-msg { margin-top: 20px; border: 2px solid var(--success); background: #F0FDF4; color: var(--success); padding: 20px; border-radius: 8px; display: none; }
     </style>
 </head>
 <body>
-
-    <div id="login-screen">
-        <div class="login-box">
-            <i data-lucide="lock" style="color:var(--primary-500); width:48px; height:48px; margin-bottom:20px;"></i>
-            <h2 style="font-size: 18px;">SYSTEM ACCESS</h2>
-            <p style="color:var(--text-muted); font-size: 13px;">ENTER PASSCODE FROM STAGE 1</p>
-            <input type="text" class="pass-input" id="passcode" maxlength="8" placeholder="_ _ _ _ _ _ _ _" autofocus>
-        </div>
-    </div>
-
-    <div id="intro-overlay">
-        <div class="mission-card">
-            <div style="color:var(--primary-700); font-family:'JetBrains Mono'; font-weight:bold; margin-bottom:15px;">AUDIO INTERCEPT</div>
-            <p>You identified the threat. Reorder the conversation packets to reconstruct the events.<br><br>
-            <strong>WARNING:</strong> Mistakes cost 1 minute.</p>
-            <button class="btn-main" onclick="startGame()">START ANALYSIS</button>
-        </div>
-    </div>
-
-    <div id="game-over-overlay">
-        <div class="mission-card" style="border-color: var(--error);">
-            <h1 style="color:var(--error)">SIGNAL LOST</h1>
-            <button class="btn-main" onclick="location.reload()">RESTART SYSTEM</button>
-        </div>
-    </div>
-
+    <div id="login-screen"><div class="login-box"><h2>SYSTEM ACCESS</h2><p>ENTER PASSCODE FROM STAGE 1</p><input type="text" class="pass-input" id="passcode" maxlength="8" placeholder="_ _ _ _ _ _ _ _" autofocus></div></div>
+    <div id="intro-overlay"><div class="mission-card"><h3>AUDIO INTERCEPT</h3><p>Reorder the packets to reconstruct the events. Mistakes cost 1 minute.</p><button class="btn-main" onclick="startGame()">START ANALYSIS</button></div></div>
+    <div id="game-over-overlay"><div class="mission-card"><h1 style="color:var(--error)">SIGNAL LOST</h1><button class="btn-main" onclick="location.reload()">RESTART</button></div></div>
     <div id="game-ui">
-        <div class="header">
-            <span style="font-weight:bold;">AUDIO_RECONSTRUCT_V3</span>
-            <div id="timer-display">10:00</div>
-        </div>
+        <div class="header"><span>AUDIO_RECONSTRUCT_V3</span><div id="timer-display">10:00</div></div>
         <div class="pool-zone"><div id="packet-container"></div></div>
         <div class="timeline-zone">
             <div id="timeline-container"></div>
             <div id="penalty-msg"></div>
             <button id="check-btn" onclick="checkSolution()" disabled>ANALYZE SEQUENCE</button>
-            <div id="puzzle-area">
-                <input type="text" id="final-word" class="puzzle-input" maxlength="6" onkeyup="checkFinalPuzzle()">
-            </div>
-            <div id="success-msg">
-                <h3>LOCATION IDENTIFIED: BOILER ROOM</h3>
-                <button onclick="goToStage3()" class="btn-main">PROCEED TO STAGE 3</button>
-            </div>
+            <div id="puzzle-area"><p>SEQUENCE CORRECT. DESCRAMBLE THE HIGHLIGHTS:</p><input type="text" id="final-word" class="puzzle-input" maxlength="6" onkeyup="checkFinalPuzzle()"></div>
+            <div id="success-msg"><h3>IDENTIFIED: BOILER ROOM</h3><button onclick="goToStage3()" class="btn-main">PROCEED TO STAGE 3</button></div>
         </div>
     </div>
 
     <script>
-        const _secret = "aHR0cHM6Ly9wcmVpdmFyYXQuZ2l0aHViLmlvL21heWFfcGFydDMv";
+        // Fragmented URL for stability
+        const root = "https://prievarat.github.io/";
+        const folder = "maya_part3/";
+        
         const audioData = [
             { id: 1, text: "[DRIVER]: Shut the door. And take her phone. We can't have her track{i}ng us." },
             { id: 2, text: "[MAYA]: My phone has a GPS l{o}ck! You can't turn it off." },
@@ -116,12 +73,12 @@
         ];
 
         let userSequence = [];
-        let timeLeft = 600; // 10 Minutes
+        let shuffledData = [];
+        let timeLeft = 600;
         let timerInterval;
 
         lucide.createIcons();
 
-        // Login Logic
         document.getElementById('passcode').addEventListener('input', (e) => {
             if(e.target.value.toUpperCase() === 'BLACKOUT') {
                 document.getElementById('login-screen').style.display = 'none';
@@ -132,6 +89,12 @@
         function startGame() {
             document.getElementById('intro-overlay').style.display = 'none';
             document.getElementById('game-ui').style.display = 'grid';
+            // FISHER-YATES SHUFFLE
+            shuffledData = [...audioData];
+            for (let i = shuffledData.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffledData[i], shuffledData[j]] = [shuffledData[j], shuffledData[i]];
+            }
             timerInterval = setInterval(updateTimer, 1000);
             renderPool(); renderTimeline();
         }
@@ -147,7 +110,7 @@
         function renderPool() {
             const container = document.getElementById('packet-container');
             container.innerHTML = '';
-            audioData.forEach(pkt => {
+            shuffledData.forEach(pkt => {
                 const used = userSequence.find(u => u.id === pkt.id);
                 const div = document.createElement('div');
                 div.className = `packet ${used ? 'used' : ''}`;
@@ -176,7 +139,7 @@
                 document.getElementById('check-btn').style.display = 'none';
                 document.getElementById('puzzle-area').style.display = 'block';
             } else {
-                timeLeft -= 60; // Penalty
+                timeLeft -= 60;
                 document.getElementById('penalty-msg').innerText = "SEQUENCE INCORRECT. -1 MINUTE.";
                 userSequence = []; renderPool(); renderTimeline();
             }
@@ -190,10 +153,9 @@
         }
 
         function goToStage3() {
-            const dest = atob(_secret) + "?v=" + Math.floor(Math.random() * 9999);
-            window.location.assign(dest);
+            // Force reliable navigation
+            window.location.assign(root + folder + "?v=" + Date.now());
         }
     </script>
 </body>
 </html>
-
